@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}{% endblock %} | Joshua Sterner – Creativity Through Technology</title>
+        <link rel="stylesheet" href="{% static "styles.css" %}">
+    </head>
+    <body>
+        <header>
+                <img class="shadow" id="profile-picture" src="{% static "profile512.jpg" %}" alt="Picture of Joshua Sterner"/>
+                <div class="shadow" id="header-title-container">
+                    <h1>Joshua Sterner</h1>
+                    <h2>Creativity<br>Through<br>Technology</h2>
+                </div>
+            <!--
+            <nav class="shadow">
+                <ul>
+                    <li><a href="/"><h2>Home</h2></a></li>
+                    <li><a href="/blog"><h2>Blog</h2></a></li>
+                    <li><a href="/resume"><h2>Resume</h2></a></li>
+                    <li><a href="/music"><h2>Music</h2></a></li>
+                    <li><a href="/projects"><h2>Projects</h2></a></li>
+                </ul>
+            </nav>
+            -->
+        </header>
+        <section class="content-section">
+        {% block content %} {% endblock %}
+        </section>
+    </body>
+</html>

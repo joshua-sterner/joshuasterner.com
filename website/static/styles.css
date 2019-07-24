@@ -1,0 +1,124 @@
+body {
+    margin: 0px;
+}
+
+header {
+    display: grid;
+    grid-template-columns: minmax(3em, 8em) minmax(6em, 100%);
+    grid-template-rows: auto;
+    margin: 0px;
+}
+
+
+.shadow {
+    box-shadow: 0px 0px 16px rgb(0, 0, 0);
+}
+
+#profile-picture {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#header-title-container {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    padding: 0.3em 0.45em 0.3em 0.45em;
+    z-index: 1;
+    background-color: #fff;
+    display: grid;
+    grid-template-rows: auto fit-content(100%);
+}
+
+#header-title-container h1 {
+    margin: 0em;
+    font-family: Sans-Serif;
+    font-weight: bold;
+    font-size: 6vw;
+    white-space: nowrap;
+}
+
+
+#header-title-container h2 {
+    text-align: right;
+    font-family: sans-serif;
+    font-style: italic;
+    font-size: 4vw;
+    margin: 0;
+}
+
+@media (min-width: 36em) {
+    #header-title-container h1 {
+        font-size: 2.2em;
+    }
+    #header-title-container h2 {
+        font-size: 1.45em;
+    }
+}
+
+@media (min-width: 48em) {
+    header {
+        width: 47em;
+        margin: auto;
+    }
+}
+
+@media (max-width: 9em) {
+    header {
+        grid-template-columns: 3em auto;
+        grid-template-rows: 3em;
+    }
+    #header-title-container h1 {
+        font-size: 0.55em;
+    }
+}
+
+header nav {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: #fff;
+    grid-template-rows: auto;
+}
+
+header nav ul {
+    list-style-type: none;
+    font-family: sans-serif;
+    line-height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    height: 100%;
+}
+
+header nav ul li {
+    display: inline-block;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    height: 100%;
+    line-height: normal;
+    box-shadow: 0px 0px 0.75em rgba(86, 162, 197, 0.68);
+    box-shadow: inset 0px 0px 1.5em rgba(58, 154, 198, 0.61);
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+header nav ul li a {
+    color: black;
+    text-decoration: none;
+}
+
+header nav ul li a h2 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
