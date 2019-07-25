@@ -96,21 +96,23 @@ header nav ul {
     padding-bottom: 0px;
     padding-left: 0.75em;
     padding-right: 0.75em;
-    margin-top: 0px;
+    margin-top: -1em;
     margin-bottom: 0px;
-    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 header nav ul li {
     display: inline-block;
+    margin-top: 1em;
     margin-left: 0.25em;
     margin-right: 0.25em;
-    height: 100%;
     line-height: normal;
     box-shadow: 0px 0px 0.75em rgba(86, 162, 197, 0.68);
-    box-shadow: inset 0px 0px 1.5em rgba(58, 154, 198, 0.61);
-    padding-left: 1em;
-    padding-right: 1em;
+    padding: 0.5em;
 }
 
 header nav ul li a {
@@ -119,6 +121,6 @@ header nav ul li a {
 }
 
 header nav ul li a h2 {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin: 0px;
+    font-size: 1.5em;
 }
