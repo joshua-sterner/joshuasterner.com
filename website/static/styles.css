@@ -102,8 +102,16 @@ header nav ul li a h2 {
     font-size: 4vw;
 }
 
-@media (max-width: 24em) {
-    header nav ul li a h2{
+section.content-section {
+    margin: 1.5em auto;
+    max-width: 46em;
+    padding: 1.0em;
+    border-radius: 0.5em;
+}
+
+@media (max-width: 51em) {
+    section.content-section {
+        margin: 1.5em 1.5em;
     }
 }
 
@@ -130,7 +138,7 @@ header nav ul li a h2 {
 
 @media (min-width: 48em) {
     header {
-        width: 47em;
+        width: 48em;
         margin: auto;
     }
 }
