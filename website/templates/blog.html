@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Blog{% endblock %}
+
+{% block content %}
+<div class="tags">
+{% for tag in tags %}
+    <p>{{ tag.name }}</p>
+{% endfor %}
+</div>
+{% for post in posts %}
+{% include "blog_post.html" with post=post %}
+{% endfor %}
+<nav class="page-navbar">
+    <ul>
+        {% for page_number in page_numbers %}
+        <li><a href="/blog/{{ page_number }}">{{ page_number }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
+
+{% endblock %}
