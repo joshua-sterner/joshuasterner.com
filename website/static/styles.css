@@ -10,7 +10,8 @@ header {
     display: grid;
     grid-template-columns: minmax(3em, 8em) minmax(6em, 100%);
     grid-template-rows: auto;
-    margin: 0px;
+    margin: auto;
+    max-width: 72em;
 }
 
 
@@ -109,14 +110,14 @@ nav ul li a h2 {
 
 .content-section {
     margin: 1.5em auto;
-    max-width: 46em;
+    max-width: 70em;
     padding: 1.0em;
     border-radius: 0.5em;
     font-family: sans-serif;
 }
 
 
-@media (max-width: 51em) {
+@media (max-width: 75em) {
     .content-section {
         margin: 1.5em 1.5em;
     }
@@ -140,13 +141,6 @@ nav ul li a h2 {
     }
     nav ul {
         margin-top: -0.75em;
-    }
-}
-
-@media (min-width: 48em) {
-    header {
-        width: 48em;
-        margin: auto;
     }
 }
 
