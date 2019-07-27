@@ -23,6 +23,6 @@ def blog(request, page=1):
     return blog_posts_by_QuerySet(request, page, query_set, reverse('blog'))
 
 def blog_posts_by_tag(request, tag, page=1):
-    query_set = Tag.objects.get(name=tag).blogpost_set.all()
+    query_set = Tag.objects.get(name=tag).blogpost_set.order_by('-date_posted')
     query_root = reverse('blog_by_tag', args=[tag])
     return blog_posts_by_QuerySet(request, page, query_set, query_root)
