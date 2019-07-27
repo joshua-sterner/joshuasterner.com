@@ -53,7 +53,7 @@ header {
     margin: 0;
 }
 
-header nav {
+nav {
     grid-column-start: 1;
     grid-column-end: 3;
     grid-row-start: 2;
@@ -63,7 +63,7 @@ header nav {
     z-index: 99;
 }
 
-header nav ul {
+nav ul {
     list-style-type: none;
     font-family: sans-serif;
     line-height: 0px;
@@ -81,7 +81,7 @@ header nav ul {
     justify-content: center;
 }
 
-header nav ul li {
+nav ul li {
     display: inline-block;
     margin-top: 0.75em;
     margin-left: 1vw;
@@ -92,12 +92,12 @@ header nav ul li {
     padding: calc(0.1em + 1.85vw);
 }
 
-header nav ul li a {
+nav ul li a {
     color: black;
     text-decoration: none;
 }
 
-header nav ul li a h2 {
+nav ul li a h2 {
     margin: 0px;
     font-size: 1.4em;
     font-size: 4vw;
@@ -125,16 +125,16 @@ header nav ul li a h2 {
     #header-title-container h2 {
         font-size: 1.45em;
     }
-    header nav ul li a h2 {
+    nav ul li a h2 {
         font-size: 1.45em;
     }
-    header nav ul li {
+    nav ul li {
         margin-left: 0.375em;
         margin-right: 0.375em;
         margin-top: 0.75em;
         padding: 0.75em;
     }
-    header nav ul {
+    nav ul {
         margin-top: -0.75em;
     }
 }
@@ -154,16 +154,16 @@ header nav ul li a h2 {
     #header-title-container h1 {
         font-size: 0.55em;
     }
-    header nav ul li a h2 {
+    nav ul li a h2 {
         font-size: 0.35em;
     }
 }
 
 @media (max-width: 13.5em) {
-    header nav ul li a h2 {
+    nav ul li a h2 {
         font-size: calc(0.25em + 2vw);
     }
-    header nav ul li {
+    nav ul li {
         padding: calc(0.125em + 2vw);
     }
 }
@@ -246,3 +246,22 @@ header nav ul li a h2 {
 .last-element-in-header {
     border-radius: 0em 0em 0.5em 0.5em;
 }
+
+.page-navbar ul {
+    margin-top: 0em;
+}
+
+.page-navbar ul li {
+    margin-top: 0em;
+    padding: 0.2em;
+}
+
+.page-navbar ul li a {
+}
+
+footer.content-section {
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+
