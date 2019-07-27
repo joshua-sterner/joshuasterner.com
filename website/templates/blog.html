@@ -15,9 +15,8 @@
 <footer class="shadow content-section">
     <nav class="page-navbar">
         <ul>
-            <li><a href="{{ query_root }}/1">First</a></li>
-            
             {% if page > 1 %}
+            <li><a href="{{ query_root }}/1">First</a></li>
             <li><a href="{{ query_root }}/{{ page|add:"-1" }}">Previous</a></li>
             {% endif %}
 
@@ -27,9 +26,9 @@
 
             {% if page < page_count %}
             <li><a href="{{ query_root }}/{{ page|add:"1" }}">Next</a></li>
+            <li><a href="{{ query_root }}/{{ page_count }}">Last</a></li>
             {% endif %}
 
-            <li><a href="{{ query_root }}/{{ page_count }}">Last</a></li>
         </ul>
     </nav>
 </footer>
