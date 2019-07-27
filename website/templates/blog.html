@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
-
-{% block content %}
-<div class="tags">
-    <h3>Tags</h3>
+{% block header-content %}
+<div class="shadow tags">
+    <h5>Tags:</h5>
 {% for tag in tags %}
     <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
 {% endfor %}
 </div>
+{% endblock %}
+{% block content %}
 {% for post in posts %}
 {% include "blog_post.html" with post=post %}
 {% endfor %}

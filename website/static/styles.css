@@ -21,7 +21,7 @@ header {
     grid-row-end: 2;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 100;
 }
 
 #header-title-container {
@@ -30,7 +30,7 @@ header {
     grid-row-start: 1;
     grid-row-end: 2;
     padding: 0.3em 0.45em 0.3em 0.45em;
-    z-index: 1;
+    z-index: 100;
     background-color: #fff;
     display: grid;
     grid-template-rows: auto fit-content(100%);
@@ -60,6 +60,7 @@ header nav {
     grid-row-end: 3;
     background-color: #fff;
     grid-template-rows: auto;
+    z-index: 99;
 }
 
 header nav ul {
@@ -102,15 +103,17 @@ header nav ul li a h2 {
     font-size: 4vw;
 }
 
-section.content-section {
+.content-section {
     margin: 1.5em auto;
     max-width: 46em;
     padding: 1.0em;
     border-radius: 0.5em;
+    font-family: sans-serif;
 }
 
+
 @media (max-width: 51em) {
-    section.content-section {
+    .content-section {
         margin: 1.5em 1.5em;
     }
 }
@@ -165,4 +168,77 @@ section.content-section {
     }
 }
 
+.tags {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    z-index: 98;
+    padding: 0.5em;
+}
 
+.tags h5 {
+    margin-top: 0em;
+    display: inline;
+    font-family: sans-serif;
+}
+
+.tags a {
+    color: black;
+    font-size: 0.8em;
+    font-family: sans-serif;
+}
+
+.post-header {
+    display:grid;
+    grid-template-rows: auto;
+    grid-template-columns: auto;
+}
+
+.post-title {
+    margin: 0em;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.post-header p {
+    margin: 0em;
+    font-size: 0.8em;
+    font-family: sans-serif;
+}
+
+.post-date-posted {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    text-align: right;
+    align-self: end;
+}
+
+.post-date-edited {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    text-align: right;
+}
+
+.post-tags {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+
+.post-tags h6 {
+    margin: 0em;
+    display: inline;
+    font-family: sans-serif;
+}
+
+.post-tags a {
+    font-family: sans-serif;
+    font-size: 0.7em;
+    color: black;
+}

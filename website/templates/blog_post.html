@@ -1,8 +1,8 @@
 {% load markdown %}
 
 <section class="content-section shadow">
-    <h2>{{ post.title }}</h2>
-    <div class="post-metadata">
+    <div class="post-header">
+        <h2 class="post-title">{{ post.title }}</h2>
         <p class="post-date-posted">
             Posted: {{ post.date_posted }}
         </p>
@@ -10,7 +10,7 @@
             Last Modified: {{ post.date_modified }}
         </p>
         <div class="post-tags">
-            <h3>Tags:</h3>
+            <h6>Tags:</h6>
             {% for tag in post.tags.all %}
             <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
             {% endfor %}
