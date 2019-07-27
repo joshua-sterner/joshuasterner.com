@@ -3,6 +3,7 @@
 
 {% block content %}
 <div class="tags">
+    <h3>Tags</h3>
 {% for tag in tags %}
     <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
 {% endfor %}
@@ -13,9 +14,21 @@
 <footer>
     <nav class="page-navbar">
         <ul>
+            <li><a href="{{ query_root }}/1">First</a></li>
+            
+            {% if page > 1 %}
+            <li><a href="{{ query_root }}/{{ page|add:"-1" }}">Previous</a></li>
+            {% endif %}
+
             {% for page_number in page_numbers %}
-            <li><a href="{{ query_root }}/{{ page_number }}">{{ page_number }}</a></li>
+            <li><a {% if page == page_number %}class="current_page"{% endif %} href="{{ query_root }}/{{ page_number }}">{{ page_number }}</a></li>
             {% endfor %}
+
+            {% if page < page_count %}
+            <li><a href="{{ query_root }}/{{ page|add:"1" }}">Next</a></li>
+            {% endif %}
+
+            <li><a href="{{ query_root }}/{{ page_count }}">Last</a></li>
         </ul>
     </nav>
 </footer>

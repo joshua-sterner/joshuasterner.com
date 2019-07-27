@@ -14,7 +14,11 @@ def blog_posts_by_QuerySet(request, page, query_set, query_root):
     tags = Tag.objects.all()
     post_count = len(query_set)
     page_count = max(0, post_count - 1)//posts_per_page + 1
-    page_numbers = range(1, page_count+1)
+    # generate page numbers
+    page_number_limit = 10
+    left_page_number = max(page - page_number_limit//2, 1)
+    right_page_number = min(left_page_number+page_number_limit-1, page_count)
+    page_numbers = range(left_page_number, right_page_number + 1)
     context = {'posts': posts, 'tags': tags, 'page': page, 'page_count': page_count, 'page_numbers': page_numbers, 'query_root': query_root}
     return render(request, 'blog.html', context)
 
