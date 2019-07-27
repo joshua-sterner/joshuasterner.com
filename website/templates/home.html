@@ -2,6 +2,8 @@
 
 {% block title %}Home{% endblock %}
 
+{% block navbar-classes %} last-element-in-header {{ block.super }}{% endblock %}
+
 {% block content %}
 <section class="content-section shadow">
     <h2>Welcome to my website!</h2>

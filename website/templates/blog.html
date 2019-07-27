@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
 {% block header-content %}
-<div class="shadow tags">
+<div class="shadow tags last-element-in-header">
     <h5>Tags:</h5>
 {% for tag in tags %}
     <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
