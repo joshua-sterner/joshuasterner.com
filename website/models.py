@@ -9,7 +9,7 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=1000)
     post_content = models.TextField()
     tags = models.ManyToManyField(Tag)
-    date_posted = models.DateField(auto_now_add=True)
-    date_modified = models.DateField(auto_now=True)
+    date_posted = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
