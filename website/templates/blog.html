@@ -4,18 +4,20 @@
 {% block content %}
 <div class="tags">
 {% for tag in tags %}
-    <p>{{ tag.name }}</p>
+    <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
 {% endfor %}
 </div>
 {% for post in posts %}
 {% include "blog_post.html" with post=post %}
 {% endfor %}
-<nav class="page-navbar">
-    <ul>
-        {% for page_number in page_numbers %}
-        <li><a href="/blog/{{ page_number }}">{{ page_number }}</a></li>
-        {% endfor %}
-    </ul>
-</nav>
+<footer>
+    <nav class="page-navbar">
+        <ul>
+            {% for page_number in page_numbers %}
+            <li><a href="{{ query_root }}/{{ page_number }}">{{ page_number }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+</footer>
 
 {% endblock %}
