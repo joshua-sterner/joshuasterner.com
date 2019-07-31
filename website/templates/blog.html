@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
 {% block header-content %}
-<div class="shadow tags last-element-in-header">
+<div class="shadow tags last-element-in-header transparent-background">
     <h5>Tags:</h5>
 {% for tag in tags %}
     <a href="{% url "blog_by_tag" tag=tag.name %}">{{ tag.name }}</a>
@@ -12,7 +12,7 @@
 {% for post in posts %}
 {% include "blog_post.html" with post=post %}
 {% endfor %}
-<footer class="shadow content-section">
+<footer class="shadow content-section transparent-background">
     <nav class="page-navbar">
         <ul>
             {% if page > 1 %}
