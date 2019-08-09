@@ -12,12 +12,14 @@
 {% for post in posts %}
 {% include "blog_post.html" with post=post %}
 {% endfor %}
-<footer class="shadow content-section transparent-background">
+{% endblock %}
+{% block footer-attributes %}class="shadow transparent-background"{% endblock %}
+{% block footer %}
     <nav class="page-navbar">
         <ul>
             {% if page > 1 %}
-            <li><a href="{{ query_root }}/1">First</a></li>
-            <li><a href="{{ query_root }}/{{ page|add:"-1" }}">Previous</a></li>
+            <li><a href="{{ query_root }}/1">&larrb;</a></li>
+            <li><a href="{{ query_root }}/{{ page|add:"-1" }}">&larr;</a></li>
             {% endif %}
 
             {% for page_number in page_numbers %}
@@ -25,8 +27,8 @@
             {% endfor %}
 
             {% if page < page_count %}
-            <li><a href="{{ query_root }}/{{ page|add:"1" }}">Next</a></li>
-            <li><a href="{{ query_root }}/{{ page_count }}">Last</a></li>
+            <li><a href="{{ query_root }}/{{ page|add:"1" }}">&rarr;</a></li>
+            <li><a href="{{ query_root }}/{{ page_count }}">&rarrb;</a></li>
             {% endif %}
 
         </ul>

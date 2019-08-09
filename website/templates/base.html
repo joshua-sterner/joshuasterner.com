@@ -7,7 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <header>
+        <div id="background-image"></div>
+        <header class="header-footer">
                 <img class="shadow" id="profile-picture" src="{% static "profile512.jpg" %}" alt="Picture of Joshua Sterner"/>
                 <div class="shadow transparent-background" id="header-title-container">
                     <h1>Joshua Sterner</h1>
@@ -24,6 +25,11 @@
             </nav>
             {% block header-content %} {% endblock %}
         </header>
+        <main>
         {% block content %} {% endblock %}
+        </main>
+        <footer {% block footer-attributes%} {% endblock %}>
+            {% block footer %} {% endblock %}
+        </footer>
     </body>
 </html>
