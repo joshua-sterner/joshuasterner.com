@@ -120,3 +120,5 @@ LOGGING = {
         },
     },
 }
+
+STATIC_ROOT = '/tmp/static_root/'
