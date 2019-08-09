@@ -1,2 +1,3 @@
 **/__pycache__
 website/local_settings.py
+/logs
