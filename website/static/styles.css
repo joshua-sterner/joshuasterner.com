@@ -21,7 +21,7 @@ img {
 
 header {
     display: grid;
-    grid-template-columns: minmax(3em, 9em) minmax(6em, 100%);
+    grid-template-columns: minmax(3em, 9.5em) minmax(6em, 100%);
     grid-template-rows: auto;
     margin: auto;
     max-width: 72em;
