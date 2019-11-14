@@ -7,7 +7,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <div id="background-image"></div>
+        <div id="background-image">
+            <script type="text/javascript" src="static/backgroundCanvasShaders.js"></script>
+            <script type="text/javascript" src="static/backgroundCanvas.js"></script>
+            <canvas id="backgroundCanvas"></canvas>
+        </div>
         <header class="header-footer">
                 <img class="shadow" id="profile-picture" src="{% static "profile512.jpg" %}" alt="Picture of Joshua Sterner"/>
                 <div class="shadow transparent-background" id="header-title-container">
@@ -18,6 +22,7 @@
                 <ul>
                     <li><a href="/"><h2>Home</h2></a></li>
                     <li><a href="/blog"><h2>Blog</h2></a></li>
+                    <li><a href="/music"><h2>Music</h2></a></li>
                 </ul>
             </nav>
             {% block header-content %} {% endblock %}
