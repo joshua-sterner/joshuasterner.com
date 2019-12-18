@@ -302,7 +302,42 @@ footer {
     max-width: 100%;
 }
 
-.figure-div figure img, figcaption{
+.figure-div figure img, figcaption {
     display: table-row;
     max-width: 100%;
+}
+
+.figure-div-medium {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.figure-div-medium figure {
+    display: table;
+    width: 15em;
+    max-width: 100%;
+}
+
+.figure-div figure img, figcaption {
+    display: table-row;
+    max-width: 100%;
+}
+
+.incomplete-marker {
+    color: red;
+}
+
+.complete-marker {
+    color: green;
+}
+
+.milestone-list h3 {
+    margin-top: 1em;
+    margin-bottom: 0.25em;
+}
+
+.milestone-list p {
+    margin-left: 1em;
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
 }
