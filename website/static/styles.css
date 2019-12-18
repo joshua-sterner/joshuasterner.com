@@ -282,5 +282,18 @@ footer {
     grid-row-end: 4;
 }
 
+.figure-div-small {
+    display: flex;
+    flex-wrap: wrap;
+}
 
+.figure-div-small figure {
+    display: table;
+    width: 10em;
+    max-width: 100%;
+}
 
+.figure-div figure img, figcaption{
+    display: table-row;
+    max-width: 100%;
+}
