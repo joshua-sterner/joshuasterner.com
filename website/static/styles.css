@@ -24,6 +24,10 @@ img {
     background-size: cover;
 }
 
+audio {
+	width: 16em;
+}
+
 header {
     display: grid;
     grid-template-columns: minmax(3em, 9.5em) minmax(6em, 100%);
