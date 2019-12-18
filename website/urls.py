@@ -24,4 +24,5 @@ urlpatterns = [
     path('blog/tag/<str:tag>', views.blog_posts_by_tag, name='blog_by_tag'),
     path('blog/tag/<str:tag>/<int:page>', views.blog_posts_by_tag, name='blog_by_tag'),
     path('admin/', admin.site.urls),
+    path('music', views.music, name='music')
 ]

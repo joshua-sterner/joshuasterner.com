@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Music{% endblock %}
+{% block navbar-classes %} last-element-in-header {{ block.super }}{%endblock %}
+
+{% block content %}
+<section class="content-section shadow transparent-background">
+    <input type="checkbox" id="music-visualizer-toggle" >Enable Music Visualizer</input>
+    <script type="text/javascript">
+        setupBackgroundToggle();
+    </script>
+    <h3>Deafening Void - Time Travel</h3>
+    <audio id="backgroundAudio" controls="">
+        <source src="/static/Deafening Void - Time Travel - Ambient Version Normalized.mp3" type="audio/mp3">
+    </audio>
+</section>
+{% endblock %}
