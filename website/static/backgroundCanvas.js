@@ -32,17 +32,25 @@ function linkShaderProgram(gl, shaders) {
     return shaderProgram;
 }
 
+// renders an audio spectrum graph to a texture
 function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, audioElement) {
     var that = this;
-    this.width = width;
-    this.height = height;
+
+    this.width = width*textureScale;
+    this.height = height*textureScale;
     this.textureScale = textureScale;
     this.gl = gl;
+
+    // compile and link shader program
     var vertexShader = loadShader(gl, audioSpectrumVisualizationVertexShaderSource, gl.VERTEX_SHADER);
     var fragmentShader = loadShader(gl, audioSpectrumVisualizationFragmentShaderSource, gl.FRAGMENT_SHADER);
     this.shaderProgram = linkShaderProgram(gl, [vertexShader, fragmentShader]);
+
+    // clean up after shader program compilation
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
+
+    // load shader program attribute and uniform locations
     this.shaderAttributes = {
         vPos: gl.getAttribLocation(this.shaderProgram, "vPos"),
     };
@@ -51,30 +59,35 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
         res: gl.getUniformLocation(this.shaderProgram, "res"),
     };
   
-    var initialTex = new Uint8Array(this.width*this.height*4);
-    initialTex.fill(0);
-
+    // create and initialize render target texture
     this.texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    var initialTex = new Uint8Array(this.width*this.height*4);
+    initialTex.fill(0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
 
+    // create framebuffer and bind to this.texture
     this.framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0);
  
+
+    // set up resizing methods
+
+    // resizes the texture that is rendered to
     this.setTextureSize = function(width, height, textureScale) {
-        var initialTex = new Uint8Array(width*height*4);
-        initialTex.fill(0);
         that.width = width*textureScale;
         that.height = height*textureScale;
         that.textureScale = textureScale;
         gl.bindTexture(gl.TEXTURE_2D, that.texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, that.width, that.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, that.framebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, that.texture, 0);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, that.width, that.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     }
-    this.setTextureSize(width, height, textureScale);
+
     this.updateTextureSizeOnNextFrame = false;
     this.setTextureSizeOnNextFrame = function(width, height, textureScale) {
         that.updateTextureSizeOnNextFrame = true;
@@ -83,6 +96,7 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
         that.newTextureScale = textureScale
     };
     
+    // bail out if WebAudio api is not supported
     this.supported = true;
     if ((window.AudioContext || window.webkitAudioContext) === undefined) {
         this.supported = false;
@@ -91,6 +105,7 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
         return;
     }
     
+    // audio processing setup
     this.audioElement = audioElement;
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     this.audioAnalyzer = this.audioContext.createAnalyser();
@@ -101,15 +116,16 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
     this.audioSrc = this.audioContext.createMediaElementSource(this.audioElement);
     this.audioSrc.connect(this.audioAnalyzer);
     this.audioSrc.connect(this.audioContext.destination);
-   
-    this.spectrumVerts = new Float32Array(this.spectrum.length*2);
 
+    // create and set up vbo
+    this.spectrumVerts = new Float32Array(this.spectrum.length*2);
     this.vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, this.spectrumVerts, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(this.shaderAttributes.vPos);
     gl.vertexAttribPointer(this.shaderAttributes.vPos,2,gl.FLOAT,false,0,0);
     
+    // update the vertex positions based on audio frequency spectrum
     this.updateSpectrum = function() {
         if (that.updateTextureSizeOnNextFrame) {
             that.setTextureSize(that.newWidth, that.newHeight, that.newTextureScale);
@@ -124,25 +140,36 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, that.spectrumVerts);
     };
 
+    // Renders the spectrum visualization to this.texture.
     this.render = function(timestamp) {
+        // that.vertexBuffer contains the vertices that make up the points
+        // in the audio spectrum visualization (x position relates to
+        // frequency, and y position relates to amplitude)
         gl.bindBuffer(gl.ARRAY_BUFFER, that.vertexBuffer);
         gl.vertexAttribPointer(this.shaderAttributes.vPos,2,gl.FLOAT,false,0,0);
+
+        // update vertex positions
         that.updateSpectrum();
+        
+        // render to that.texture
         gl.bindFramebuffer(gl.FRAMEBUFFER, that.framebuffer);
+        
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(that.shaderProgram);
+
         gl.uniform2f(that.shaderUniforms.res, that.width, that.height);
         gl.uniform1f(that.shaderUniforms.pointSize, 8.0*that.textureScale);
+
         gl.drawArrays(gl.POINTS, 0, that.spectrum.length);
-//        gl.finish();
     }
 }
 
 
-
+// Main class for the music visualizer background
 function WebGLBackground(canvas) {
     var that = this;
 
+    // initialize webgl context
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl");
     var gl = this.gl;
@@ -156,20 +183,33 @@ function WebGLBackground(canvas) {
     this.width = canvas.width;
     this.height = canvas.height;
     this.textureScale = 1.0;
+
+    // create audio spectrum visualizer
     this.audioVisualization = new AudioSpectrumVisualization(gl, this.width, this.height, this.textureScale, 1024, document.getElementById("backgroundAudio"));
 
+
+    // create shader programs
+
+    // compile shaders
     var vertexShader = loadShader(gl, webGLBackgroundVertexShaderSource, gl.VERTEX_SHADER);
     var fragmentShader = loadShader(gl, webGLBackgroundFragmentShaderSource, gl.FRAGMENT_SHADER);
     var fragmentShaderForce = loadShader(gl, webGLBackgroundFragmentShaderForceSource, gl.FRAGMENT_SHADER);
+
+    // link shader programs
     var shaderProgram = linkShaderProgram(gl, [vertexShader, fragmentShader]);
     var shaderForceProgram = linkShaderProgram(gl, [vertexShader, fragmentShaderForce]);
+
+    // clean up after shader compilation
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
     gl.deleteShader(fragmentShaderForce);
 
-    document.getElementById("background-image").classList.add("webGLBackground");
+
+    // load shader attribute and uniform locations
+
     this.shaderProgram = shaderProgram;
     this.shaderForceProgram = shaderForceProgram;
+
     this.shaderAttributes = {
             vPos: gl.getAttribLocation(shaderProgram, "vPos"),
     };
@@ -195,6 +235,9 @@ function WebGLBackground(canvas) {
         waveform: gl.getUniformLocation(shaderForceProgram, "waveform"),
     };
 
+
+    // set up vertex buffer for rendering quad over display
+
     const verts = [
         -1.0, -1.0,
         -1.0, 1.0,
@@ -208,7 +251,11 @@ function WebGLBackground(canvas) {
     gl.enableVertexAttribArray(this.shaderAttributes.vPos);
     gl.vertexAttribPointer(this.shaderAttributes.vPos,2,gl.FLOAT,false,0,0);
 
+    // set background color of visualization to black.
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+
+    // set up mouse pointer tracking
 
     this.pointer = {x: 0, y: 0};
     this.pointerDeltaCumulative = {x: 0, y: 0};
@@ -222,9 +269,11 @@ function WebGLBackground(canvas) {
         that.pointer.y = evt.clientY * that.textureScale;
     });
 
+
+    // Create and initalize textures
+
     var initialTex = new Uint8Array(this.width*this.height*4);
     initialTex.fill(0);
-    
 
     this.backbufferTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.backbufferTexture);
@@ -234,7 +283,6 @@ function WebGLBackground(canvas) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
 
-    initialTex.fill(0);
     this.forceTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.forceTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -244,6 +292,8 @@ function WebGLBackground(canvas) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
 
 
+    // Create a framebuffer to render the force texture
+
     this.forceFramebufferTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.forceFramebufferTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -252,22 +302,19 @@ function WebGLBackground(canvas) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
 
-
     this.forceFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.forceFramebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.forceFramebufferTexture, 0);
+
+
+    // Helper methods for resizing
+
     this.updateForceTextureSizeNextRender = false;
     this.updateBackbufferTextureSizeNextRender = false;
     this.setTextureSize = function(width, height, textureScale) {
         that.width = width*textureScale;
         that.height = height*textureScale;
         that.textureScale = textureScale;
-        var initialTex = new Uint8Array(width*height*4);
-        initialTex.fill(0);
-        gl.bindTexture(gl.TEXTURE_2D, that.forceFramebufferTexture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialTex);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, that.forceFramebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, that.forceFramebufferTexture, 0);
         that.audioVisualization.setTextureSize(width, height, textureScale);
         that.updateForceTextureSizeNextRender = true;
         that.updateBackbufferTextureSizeNextRender = true;
@@ -284,16 +331,22 @@ function WebGLBackground(canvas) {
         that.newTextureScale = textureScale;
     };
 
+
+    // rendering methods
+
     this.renderForceTexture = function(timestamp) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, that.vertexBuffer);
+        // render to that.forceFramebuffer instead of the display
         gl.bindFramebuffer(gl.FRAMEBUFFER, that.forceFramebuffer);
-        //gl.clear(gl.COLOR_BUFFER_BIT);
+
         gl.useProgram(that.shaderForceProgram);
 
+        // set the shader uniforms
         gl.uniform2f(that.shaderForceUniforms.res, that.width, that.height);
         gl.uniform2f(that.shaderForceUniforms.pointer, that.pointer.x, that.pointer.y);
         gl.uniform2f(that.shaderForceUniforms.pointerDeltaCumulative, that.pointerDeltaCumulative.x, that.pointerDeltaCumulative.y);
+        gl.uniform1f(that.shaderForceUniforms.time, timestamp);
 
+        // bind the textures into the expected slots
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, that.audioVisualization.texture);
         gl.uniform1i(that.shaderForceUniforms.waveform, 1);
@@ -302,88 +355,126 @@ function WebGLBackground(canvas) {
         gl.bindTexture(gl.TEXTURE_2D, that.forceTexture);
         gl.uniform1i(that.shaderForceUniforms.forceBackbuffer, 0);
 
-        gl.uniform1f(that.shaderForceUniforms.time, timestamp);
+        /// render a quad (using two tris) over the display. All the interesting
+        // stuff here happens in the fragment shader.
         gl.bindBuffer(gl.ARRAY_BUFFER, that.vertexBuffer);
         gl.vertexAttribPointer(that.shaderForceAttributes.vPos,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        //gl.finish();
+
+        // resize that.forceTexture if render resolution changed
         if (that.updateForceTextureSizeNextRender) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, that.width, that.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-            that.updateForceTextureSizeNextRender = false;
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, that.width, that.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+          that.updateForceTextureSizeNextRender = false;
         }
+
+        // copy rendered image to that.forceTexture for feedback and use in
+        // next shader program
         gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, that.width, that.height, 0);
-      
     };
 
+    // Renders the final visualization output to a texture which is then copied
+    // to the output framebuffer. Feedback from the previous rendering of this
+    // texture is used along with displacement controlled by the force texture
+    // to achieve the smoky effect.
     this.renderOutput = function(timestamp) {
+        // output directly to displayed framebuffer
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        //gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // load the final shader program
         gl.useProgram(that.shaderProgram);
+
+        // bind the textures into the expected slots
         gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, that.audioVisualization.texture);
         gl.uniform1i(that.shaderUniforms.waveform, 2);
+
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, that.forceTexture);
         gl.uniform1i(that.shaderUniforms.force, 1);
+
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, that.backbufferTexture);
         gl.uniform1i(that.shaderUniforms.backbuffer, 0);
+
+        // set the shader uniforms
         gl.uniform2f(that.shaderUniforms.res, that.width, that.height);
         gl.uniform2f(that.shaderUniforms.pointer, that.pointer.x, that.pointer.y);
         gl.uniform2f(that.shaderUniforms.pointerDeltaCumulative, that.pointerDeltaCumulative.x, that.pointerDeltaCumulative.y);
         gl.uniform1f(that.shaderUniforms.time, timestamp);
 
+        // reset pointer movement accumulator
         that.pointerDeltaCumulative = {x: 0, y: 0};
+
+        // render a quad (using two tris) over the display. All the interesting
+        // stuff here happens in the fragment shader.
         gl.bindBuffer(gl.ARRAY_BUFFER, that.vertexBuffer);
         gl.vertexAttribPointer(that.shaderAttributes.vPos,2,gl.FLOAT,false,0,0);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        //gl.drawElements(gl.TRIANGLE_STRIP, 4, gl.UNSIGNED_SHORT, that.audioVisualization.spectrum.length*2);
-        
 
-//        gl.finish();
+        // resize that.backbufferTexture if rendering resolution changed
         if (that.updateBackbufferTextureSizeNextRender) {
+            // automatically allocates required memory. Initialization is
+            // unnecessary since this is immediately written into by the
+            // rendered image.
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, that.width, that.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             that.updateBackbufferTextureSizeNextRender = false;
         }
-      gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, that.width, that.height, 0);
-     
+
+        // copy rendered image to that.backbufferTexture for feedback
+        gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, that.width, that.height, 0);
     };
+
     that.msPerAvgFPS = 1000.0;
     that.fpsInitialTime = -1;
     this.nFrames = 0;
     this.renderCallback = function(timestamp) {
-        if (that.fpsInitialTime == -1) {
-            that.fpsInitialTime = timestamp;
-        }
-        that.nFrames = that.nFrames + 1;
-        var deltaTime = timestamp - that.fpsInitialTime;
-        if (deltaTime > that.msPerAvgFPS) {
-            var avgFps = 1000.0*that.nFrames / deltaTime;
-            that.nFrames = 0;
-            that.fpsInitialTime = timestamp
-            if (avgFps < 45.0 && that.textureScale > 0.5) {
-                that.setSizeOnNextFrame(window.innerWidth, window.innerHeight, that.textureScale - 0.125);
-            } else if (avgFps > 58.0 && that.textureScale < 1.0) {
-                that.setSizeOnNextFrame(window.innerWidth, window.innerHeight, that.textureScale + 0.125);
-            }
-        }
 
-        if (that.updateSizeOnNextFrame) {
-            that.updateSizeOnNextFrame = false;
-            that.setTextureSize(that.newWidth, that.newHeight, that.newTextureScale);
+    // Dynamically rescale to achieve a balance between quality and framerate
+    if (that.fpsInitialTime == -1) {
+        that.fpsInitialTime = timestamp;
+    }
+    that.nFrames = that.nFrames + 1;
+    var deltaTime = timestamp - that.fpsInitialTime;
+    if (deltaTime > that.msPerAvgFPS) {
+        var avgFps = 1000.0*that.nFrames / deltaTime;
+        that.nFrames = 0;
+        that.fpsInitialTime = timestamp
+        if (avgFps < 45.0 && that.textureScale > 0.5) {
+            that.setSizeOnNextFrame(window.innerWidth, window.innerHeight, that.textureScale - 0.125);
+        } else if (avgFps > 58.0 && that.textureScale < 1.0) {
+            that.setSizeOnNextFrame(window.innerWidth, window.innerHeight, that.textureScale + 0.125);
         }
-          that.audioVisualization.render(timestamp);
-        
-          that.renderForceTexture(timestamp);
+    }
 
-          that.renderOutput(timestamp);
-       
-        window.requestAnimationFrame(that.renderCallback);
+    // When the window is resized, the textures must also be resized before 
+    // they are rendered to.
+    if (that.updateSizeOnNextFrame) {
+        that.updateSizeOnNextFrame = false;
+        that.setTextureSize(that.newWidth, that.newHeight, that.newTextureScale);
+    }
+
+    // Renders the audio spectrum visualization to a texture
+    that.audioVisualization.render(timestamp);
+    
+    // Renders a texture to control the smoky distortion of the final image.
+    // The cursor and the points that make up the audio visualization spectrum
+    // are used here to change the forces, as is the previously rendered force
+    // texture.
+    that.renderForceTexture(timestamp);
+
+    // Renders the final visualization output to a texture which is then copied
+    // to the output framebuffer. Feedback from the previous rendering of this
+    // texture is used along with displacement controlled by the force texture
+    // to achieve the smoky effect.
+    that.renderOutput(timestamp);
+    
+    // keep the animation going
+    window.requestAnimationFrame(that.renderCallback);
 
     }
 
+    // start rendering on instance creation
     window.requestAnimationFrame(this.renderCallback);
-    
 }
 
 function setupBackgroundToggle() {
