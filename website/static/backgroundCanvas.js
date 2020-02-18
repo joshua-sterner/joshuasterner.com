@@ -169,6 +169,8 @@ function AudioSpectrumVisualization(gl, width, height, textureScale, fftSize, au
 function WebGLBackground(canvas) {
     var that = this;
 
+    this.enabled = true;
+
     // initialize webgl context
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl");
@@ -468,8 +470,10 @@ function WebGLBackground(canvas) {
     // to achieve the smoky effect.
     that.renderOutput(timestamp);
     
-    // keep the animation going
-    window.requestAnimationFrame(that.renderCallback);
+        if (that.enabled) {
+            // keep the animation going
+            window.requestAnimationFrame(that.renderCallback);
+        }
 
     }
 
@@ -480,11 +484,23 @@ function WebGLBackground(canvas) {
 function setupBackgroundToggle() {
     var mvt = document.getElementById("music-visualizer-toggle");
     var bg = document.getElementById("background-image");
+    var canvas = document.getElementById("backgroundCanvas");
     mvt.addEventListener('change', function() {
-        if (mvt.checked && !window.webgl_background) {
+        if (mvt.checked) {
             bg.style.backgroundColor = "#000";
             bg.style.backgroundImage = "none";
-            setupBackground();
+            if (!window.webgl_background) {
+                setupBackground();
+            } else {
+                canvas.style.visibility = "";
+                window.webgl_background.enabled = true;
+                window.requestAnimationFrame(window.webgl_background.renderCallback);
+            }
+        } else {
+            window.webgl_background.enabled = false;
+            bg.style.backgroundColor = "";
+            bg.style.backgroundImage = "";
+            canvas.style.visibility = "hidden";
         }
     });
 }
