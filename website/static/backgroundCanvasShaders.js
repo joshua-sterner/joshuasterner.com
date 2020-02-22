@@ -9,9 +9,11 @@ const audioSpectrumVisualizationVertexShaderSource = `
 
 const audioSpectrumVisualizationFragmentShaderSource = `
     uniform vec2 res;
-    float pi = 3.141592653589793238164623383;
     void main() {
+        // controls the directional influence of the spectrum visualization
+        // on the force texture
         vec2 v = gl_PointCoord*2.0 - vec2(1.0);
+        // controls the strength of the influence of the spectrum visualization
         float a = 1.0-pow(dot(v,v),1.0/8.0);
         gl_FragColor = vec4(gl_PointCoord.xy, a, 1.0);
     }
@@ -34,47 +36,40 @@ const webGLBackgroundFragmentShaderForceSource = `
     uniform sampler2D forceBackbuffer;
     uniform sampler2D waveform;
     uniform float time;
-    float B = 0.1540447954166071;
-    float C = 0.0959552045833929;
-    float B2 = 0.1801139653042357;
-    float C2 = 0.0698860346957643;
+    float B = 0.1801139653042357;
+    float C = 0.0698860346957643;
 
     float s = 20.0;
     
     float pi = 3.141592653589793238164623383;
 
+    // reads a force vector from the force texture
     vec3 retrieveForce(vec2 uv) {
         vec4 f = texture2D(forceBackbuffer, uv);
         return 2.0*(f.xyz-vec3(0.5))*f.w;
     }
+
+    // samples the force texture at adjacent and diagonally adjacent pixels,
+    // returning the sum of the (weighted) force vectors.
     vec3 retrieveAdjacentForces() {
+        // read diagonally adjacent force vectors
         vec3 fc = retrieveForce((gl_FragCoord.xy+vec2(-1.0, -1.0))/res);
         fc = fc + retrieveForce((gl_FragCoord.xy+vec2(-1.0, 1.0))/res);
         fc = fc + retrieveForce((gl_FragCoord.xy+vec2(1.0, -1.0))/res);
         fc = fc + retrieveForce((gl_FragCoord.xy+vec2(1.0, 1.0))/res);
+        
+        // read vertically/horizontally adjacent force vectors
         vec3 fb = retrieveForce((gl_FragCoord.xy+vec2(0.0,-1.0))/res);
         fb = fb + retrieveForce((gl_FragCoord.xy+vec2(0.0,1.0))/res);
         fb = fb + retrieveForce((gl_FragCoord.xy+vec2(-1.0,0.0))/res);
         fb = fb + retrieveForce((gl_FragCoord.xy+vec2(1.0,0.0))/res);
-        return fc*C2+fb*B2;
+
+        // return a weighted sum of the force vectors
+        return fc*C+fb*B;
     }
 
-    float retrieveForce2(vec2 uv) {
-        vec4 f = texture2D(forceBackbuffer, uv);
-        return f.w*2.0-1.0;
-    }
-    float retrieveAdjacentForces2() {
-        float fc = retrieveForce2((gl_FragCoord.xy+vec2(-1.0, -1.0))/res);
-        fc = fc + retrieveForce2((gl_FragCoord.xy+vec2(-1.0, 1.0))/res);
-        fc = fc + retrieveForce2((gl_FragCoord.xy+vec2(1.0, -1.0))/res);
-        fc = fc + retrieveForce2((gl_FragCoord.xy+vec2(1.0, 1.0))/res);
-        float fb = retrieveForce2((gl_FragCoord.xy+vec2(0.0,-1.0))/res);
-        fb = fb + retrieveForce2((gl_FragCoord.xy+vec2(0.0,1.0))/res);
-        fb = fb + retrieveForce2((gl_FragCoord.xy+vec2(-1.0,0.0))/res);
-        fb = fb + retrieveForce2((gl_FragCoord.xy+vec2(1.0,0.0))/res);
-        return fc+fb;
-    }
-
+    // computes a force vector from a point source p at the current pixel
+    // location. This is used to compute the influence of the cursor position.
     vec3 fv(vec2 p) {
         vec2 uv = gl_FragCoord.xy/res;
         vec2 d = vec2((uv.x-p.x)*res.x/res.y, uv.y-p.y);
@@ -90,31 +85,20 @@ const webGLBackgroundFragmentShaderForceSource = `
         vec2 p = vec2(pointer.x, res.y - pointer.y)/res;
         vec2 pDelta = vec2(pointerDeltaCumulative.x, -pointerDeltaCumulative.y)/res;
         
-
+        // compute the force vector from the pointer if it moved.
         vec3 v0 = vec3(0.0);
         if (dot(pDelta, pDelta) > 0.0) {
             v0 = fv(p);
         }
         
-        
-        vec3 v1 = vec3(0.0);
-        float k = 3.0/4.0;
-        float t = time*0.0002;
-        for (int i=0; i < 5; i++) {
-            float t2 = t + float(i)*8.0/5.0*pi;
-            vec2 p1 = vec2(0.5)*((0.9*cos(k*t2)*vec2(res.x/res.y*cos(t2),sin(t2)))+vec2(res.x/res.y,1.0));
-            v1 += fv(p1);
-        }
-        
         vec3 f = retrieveAdjacentForces();
-        vec3 prevForce = retrieveForce(gl_FragCoord.xy/res);
-        vec3 f2 = prevForce + retrieveForce((gl_FragCoord.xy+prevForce.xy)/res);
 
         vec3 vw = 2.0*(texture2D(waveform,gl_FragCoord.xy/res).xyz)-vec3(1.0);
-        vec3 v = f+2.0/127.0*(v0+vw);
-        float vm = sqrt(dot(v.xy,v.xy));
-        
-        gl_FragColor = vec4(0.5*(v/vm)+vec3(0.5), vm);
+
+        vec3 force = f+2.0/127.0*(v0+vw);
+
+        float force_magnitude = sqrt(dot(force.xy,force.xy));
+        gl_FragColor = vec4(0.5*(force/force_magnitude)+vec3(0.5), force_magnitude);
     }
 `;
 
@@ -179,7 +163,7 @@ const webGLBackgroundFragmentShaderSource = `
         vec2 dxy = vec2(dx1-dx0, dy1-dy0);
         dxy = dxy/dot(dxy,dxy);
         dxy *= 0.05/min(res.x,res.y);
-        //vec4 fb_offset = texture2D(backbuffer, uv1+dxy);
+
         vec4 f = texture2D(force, uv0/res);
         vec2 f2 = 2.0*(f.xy-vec2(0.5))*f.z;
         vec4 fb_offset = texture2D(backbuffer, (uv0+f2)/res);
@@ -190,9 +174,7 @@ const webGLBackgroundFragmentShaderSource = `
         vec3 fv3 = fv.xyz*fv.w;
         vec2 fv2 = fv.w*(fv.xy * 2.0 - vec2(1.0));
         
-        //gl_FragColor = vec4(fv.xy,0.0,1.0);
-        //gl_FragColor = texture2D(waveform, uv1);
-        gl_FragColor = a*c+0.95*texture2D(backbuffer,(uv0+4.0*(fv.xy-vec2(0.2)))/res);//vec4(fv3, 1.0);//vec4(2.0*(fv.xyz-vec3(0.5))*fv.w, 1.0);
+        gl_FragColor = a*c+0.95*texture2D(backbuffer,(uv0+4.0*(fv.xy-vec2(0.2)))/res);
 
     }
 `;
