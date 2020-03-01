@@ -33,5 +33,15 @@
         <footer {% block footer-attributes%} {% endblock %}>
             {% block footer %} {% endblock %}
         </footer>
+        <div id="high-contrast-checker" style="background-image: url('#')"></div>
+        <script type="text/javascript">
+            var highContrastChecker = document.getElementById("high-contrast-checker");
+            if (getComputedStyle(highContrastChecker).backgroundImage === 'none') {
+                var shadowElements = document.getElementsByClassName("shadow");
+                for (var i=0; i < shadowElements.length|0; i++) {
+                    shadowElements[i].classList.add("high-contrast-border");
+                }
+            }
+        </script>
     </body>
 </html>

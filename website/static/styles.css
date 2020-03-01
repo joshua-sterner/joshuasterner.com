@@ -1,3 +1,12 @@
+#high-contrast-checker {
+    width: 0px;
+    height: 0px;
+}
+
+.high-contrast-border {
+    border: 2px #000 solid;
+}
+
 body {
     margin: 0px;
     display: grid;
