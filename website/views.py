@@ -5,7 +5,14 @@ from .models import Tag
 from django.urls import reverse
 
 def home(request):
-    return render(request, 'home.html', {})
+    return render(request, 'home.html', {'projects': [
+        {'title':'Infinite Go', 'image_url':'static/infinite_go_transparent.png', 'image_alt':'infinite go logo',
+            'url':'https://infinitego.net'},
+        {'title':'Todo', 'image_url':'static/todo.png', 'image_alt':'todo script results',
+            'url':'https://github.com/joshua-sterner/todo'},
+        {'title':'Music Visualizer', 'image_url':'static/music-visualizer.png', 'image_alg':'',
+            'url':'music'}
+    ]})
 
 def generate_blog_page_numbers(page, posts, page_number_limit=10, posts_per_page=5):
     page_count = max(0, posts - 1)//posts_per_page + 1

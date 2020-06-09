@@ -350,3 +350,38 @@ footer {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
 }
+
+.project-blocks {
+    display: grid;
+    grid-template-columns: 33.33% 33.33% 33.33%;
+    padding: 0.75em;
+    max-width: 73.5em;
+    margin: auto;
+    padding-top: 0em;
+    margin-top: -0.75em;
+}
+
+@media (max-width: 42em) {
+    .project-blocks {
+        grid-template-columns: 50% 50%;
+    }
+}
+
+@media (max-width: 26em) {
+    .project-blocks {
+        grid-template-columns: 100%;
+    }
+}
+
+.project-blocks a {
+    color: black;
+    margin: -0.75em;
+}
+
+.project-blocks a div {
+    margin: 1.5em 1.5em;
+}
+
+.project-blocks a div h2 {
+    margin: 0em;
+}
